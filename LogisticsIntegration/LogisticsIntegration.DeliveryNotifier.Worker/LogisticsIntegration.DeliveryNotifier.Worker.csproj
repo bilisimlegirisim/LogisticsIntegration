@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-LogisticsIntegration.DeliveryNotifier.Worker-52632500-64f3-41de-a9a3-d1ad321d726b</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LogisticsIntegration.ApiClients\LogisticsIntegration.ApiClients.csproj" />
+    <ProjectReference Include="..\LogisticsIntegration.Application\LogisticsIntegration.Application.csproj" />
+    <ProjectReference Include="..\LogisticsIntegration.Domain\LogisticsIntegration.Domain.csproj" />
+    <ProjectReference Include="..\LogisticsIntegration.Infrastructure\LogisticsIntegration.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

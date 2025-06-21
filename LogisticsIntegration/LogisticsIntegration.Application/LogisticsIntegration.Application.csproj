@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LogisticsIntegration.ApiClients\LogisticsIntegration.ApiClients.csproj" />
+    <ProjectReference Include="..\LogisticsIntegration.Domain\LogisticsIntegration.Domain.csproj" />
+    <ProjectReference Include="..\LogisticsIntegration.Infrastructure\LogisticsIntegration.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
