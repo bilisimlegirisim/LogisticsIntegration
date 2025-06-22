@@ -1,0 +1,120 @@
+﻿@model LogisticsIntegration.Web.Models.OrderDetailViewModel
+
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+}
+
+<h1>Sipariş Detayı</h1>
+
+<div>
+    <h4>Sipariş Bilgileri</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">ID:</dt>
+        <dd class="col-sm-9">@Model.Order.Id</dd>
+
+        <dt class="col-sm-3">Müşteri Sipariş ID:</dt>
+        <dd class="col-sm-9">@Model.Order.CustomerOrderId</dd>
+
+        <dt class="col-sm-3">Sipariş Tarihi:</dt>
+        <dd class="col-sm-9">@Model.Order.OrderDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-3">Sevk Noktası:</dt>
+        <dd class="col-sm-9">@Model.Order.ShippingPoint</dd>
+
+        <dt class="col-sm-3">Teslim Alacak Kişi:</dt>
+        <dd class="col-sm-9">@Model.Order.RecipientName</dd>
+
+        <dt class="col-sm-3">İrtibat Telefonu:</dt>
+        <dd class="col-sm-9">@Model.Order.ContactPhone</dd>
+
+        <dt class="col-sm-3">Mevcut Durum:</dt>
+        <dd class="col-sm-9">@Model.Order.Status</dd>
+    </dl>
+
+    @if (Model.Order.OrderItems != null && Model.Order.OrderItems.Any())
+    {
+        <h5>Sipariş Ürünleri</h5>
+        <ul>
+            @foreach (var item in Model.Order.OrderItems)
+            {
+                <li>@item.ProductName (@item.Quantity adet)</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>Bu sipariş için ürün bilgisi bulunmamaktadır.</p>
+    }
+</div>
+
+@if (Model.Order.Status != LogisticsIntegration.Domain.Entities.OrderStatus.Completed)
+{
+    <h4>Durum Güncelle</h4>
+    <hr />
+    <form asp-action="UpdateStatus" asp-route-id="@Model.Order.Id" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Order.Id" />
+        <input type="hidden" asp-for="Order.CustomerOrderId" />
+
+        <div class="form-group">
+            <label asp-for="NewStatus" class="control-label"></label>
+            <select asp-for="NewStatus" class="form-control" asp-items="Html.GetEnumSelectList<LogisticsIntegration.Domain.Entities.OrderStatus>()"></select>
+            <span asp-validation-for="NewStatus" class="text-danger"></span>
+        </div>
+
+        <div id="deliveryInfoFields" class="mt-3">
+            <p class="text-info">Teslim Edildi seçilirse aşağıdaki bilgiler zorunludur:</p>
+            <div class="form-group">
+                <label asp-for="PlateNumber" class="control-label"></label>
+                <input asp-for="PlateNumber" class="form-control" />
+                <span asp-validation-for="PlateNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DelivererName" class="control-label"></label>
+                <input asp-for="DelivererName" class="form-control" />
+                <span asp-validation-for="DelivererName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <input type="submit" value="Durumu Güncelle" class="btn btn-primary" />
+        </div>
+    </form>
+}
+else
+{
+    <div class="alert alert-info mt-4">
+        Bu sipariş 'Tamamlandı' statüsündedir ve durumu güncellenemez.
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-action="Index">Sipariş Listesine Geri Dön</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            toggleDeliveryInfoFields();
+
+            $('#NewStatus').change(function () {
+                toggleDeliveryInfoFields();
+            });
+
+            function toggleDeliveryInfoFields() {
+                var selectedStatus = parseInt($('#NewStatus').val());
+                if (selectedStatus === @((int)LogisticsIntegration.Domain.Entities.OrderStatus.Delivered)) {
+                    $('#deliveryInfoFields').show();
+                } else {
+                    $('#deliveryInfoFields').hide();
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,46 @@
+﻿@model LogisticsIntegration.Web.Models.OrderListViewModel
+
+@{
+    ViewData["Title"] = "Sipariş Listesi";
+}
+
+<h1>Sipariş Listesi</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Müşteri Sipariş ID</th>
+            <th>Sipariş Tarihi</th>
+            <th>Sevk Noktası</th>
+            <th>Teslim Alacak Kişi</th>
+            <th>Telefon</th>
+            <th>Durum</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Orders)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.CustomerOrderId</td>
+                <td>@item.OrderDate.ToShortDateString()</td>
+                <td>@item.ShippingPoint</td>
+                <td>@item.RecipientName</td>
+                <td>@item.ContactPhone</td>
+                <td>@item.Status</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Detaylar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
