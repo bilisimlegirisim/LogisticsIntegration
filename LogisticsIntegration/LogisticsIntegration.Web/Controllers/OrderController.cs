@@ -62,11 +62,6 @@ namespace LogisticsIntegration.Web.Controllers
             
             model.Order = await _orderService.GetOrderByIdAsync(id); 
 
-            if (!ModelState.IsValid)
-            {
-                return View("Details", model);
-            }
-
             try
             {
                 await _orderService.UpdateOrderStatusAndDeliveryInfoAsync(

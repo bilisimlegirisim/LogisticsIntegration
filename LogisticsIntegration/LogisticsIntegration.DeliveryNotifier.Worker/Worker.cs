@@ -1,4 +1,5 @@
 using LogisticsIntegration.ApiClients.BCompany.Interfaces;
+using LogisticsIntegration.Application.Services;
 using LogisticsIntegration.Domain.Dtos;
 using LogisticsIntegration.Domain.Interfaces;
 
@@ -17,62 +18,39 @@ namespace LogisticsIntegration.DeliveryNotifier.Worker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Delivery Notifier Worker started at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Delivery Notifier Worker baþlatýldý: {time}", DateTimeOffset.Now);
+
+            // Periyot: Her 5 dakikada bir çalýþacak
+            TimeSpan delay = TimeSpan.FromMinutes(5);
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogInformation("Worker çalýþýyor: {time}", DateTimeOffset.Now);
 
+                // Her döngüde yeni bir servis kapsamý (scope) oluþturulur.
+                // Bu, Scoped lifetime'daki servislerin (örn. DbContext, UnitOfWork) doðru þekilde yönetilmesini saðlar.
                 using (var scope = _scopeFactory.CreateScope())
                 {
-                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var deliveryApiClient = scope.ServiceProvider.GetRequiredService<ICustomerDeliveryApiClient>();
+                    var deliveryNotificationService = scope.ServiceProvider.GetRequiredService<DeliveryNotificationService>();
 
                     try
                     {
-                        var ordersToNotify = await unitOfWork.Orders.GetOrdersNotNotifiedToCustomer();
-
-                        foreach (var order in ordersToNotify)
-                        {
-                            _logger.LogInformation($"Sipariþ ID {order.Id} için teslimat bildirimi gönderiliyor...");
-
-                            var isNotified = await deliveryApiClient.NotifyCustomerDeliveryAsync(
-                                new CustomerDeliveryNotificationDTO
-                                {
-                                    OrderId = order.Id,
-                                    CustomerEmail = "customer@mail.com", 
-                                    DeliveryDate = DateTime.UtcNow
-                                });
-
-                            if (isNotified)
-                            {
-                                var delivery = await unitOfWork.Deliveries.FindAsync(d => d.OrderId == order.Id);
-                                if (delivery.Any())
-                                {
-                                    var currentDelivery = delivery.FirstOrDefault();
-                                    currentDelivery.IsNotifiedToCustomer = true;
-                                    currentDelivery.NotificationDate = DateTime.UtcNow; 
-                                    unitOfWork.Deliveries.Update(currentDelivery);
-                                    await unitOfWork.CompleteAsync();
-                                    _logger.LogInformation($"Sipariþ ID {order.Id} için teslimat bildirimi baþarýlý ve güncellendi.");
-                                }
-                            }
-                            else
-                            {
-                                _logger.LogWarning($"Sipariþ ID {order.Id} için teslimat bildirimi baþarýsýz.");
-                            }
-                        }
+                        // DeliveryNotificationService'deki iþ mantýðýný çaðýrýyoruz.
+                        // Tüm sorgulama, bildirim ve veritabaný güncelleme iþini bu servis yapacak.
+                        await deliveryNotificationService.NotifyPendingDeliveriesAsync();
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Worker içerisinde bir hata oluþtu.");
+                        _logger.LogError(ex, "Delivery Notifier Worker'da bildirim iþlemi sýrasýnda bir hata oluþtu.");
+                        
                     }
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+             
+                await Task.Delay(delay, stoppingToken);
             }
 
-            _logger.LogInformation("Delivery Notifier Worker stopped at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Delivery Notifier Worker durduruldu: {time}", DateTimeOffset.Now);
         }
     }
 }

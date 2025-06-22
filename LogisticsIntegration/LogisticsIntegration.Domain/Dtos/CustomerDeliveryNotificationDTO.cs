@@ -8,8 +8,11 @@ namespace LogisticsIntegration.Domain.Dtos
 {
     public class CustomerDeliveryNotificationDTO
     {
-        public int OrderId { get; set; }         
+        public string OrderId { get; set; }         
         public string CustomerEmail { get; set; } 
         public DateTime DeliveryDate { get; set; }
+
+        public string PlateNumber { get; set; } 
+        public string DelivererName { get; set; } 
     }
 }

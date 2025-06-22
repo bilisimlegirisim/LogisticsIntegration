@@ -1,5 +1,6 @@
 using LogisticsIntegration.ApiClients.BCompany.Implementations.Mocks;
 using LogisticsIntegration.ApiClients.BCompany.Interfaces;
+using LogisticsIntegration.Application.Services;
 using LogisticsIntegration.DeliveryNotifier.Worker;
 using LogisticsIntegration.Domain.Interfaces;
 using LogisticsIntegration.Infrastructure.Data;
@@ -34,11 +35,14 @@ namespace LogisticsIntegration.DeliveryNotifier.Worker
                     // Repository ve UnitOfWork Kaydý
                     services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
                     services.AddScoped<IOrderRepository, OrderRepository>();
+                    services.AddScoped<IDeliveryRepository, DeliveryRepository>();
                     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
                     // API Clients Kaydý (Mock implementasyonlarý)
                     services.AddScoped<ICustomerOrderSoapClient, MockCustomerOrderSoapClient>();
                     services.AddScoped<ICustomerDeliveryApiClient, MockCustomerDeliveryApiClient>();
+
+                    services.AddScoped<DeliveryNotificationService>(); //Application Servis
 
                     // Worker Hizmetini HostedService olarak kaydet
                     services.AddHostedService<Worker>();
